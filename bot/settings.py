@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "rest_framework_simplejwt",
     "core",
-    "twilio",
 ]
 
 MIDDLEWARE = [
