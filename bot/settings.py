@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "rest_framework_simplejwt.token_blacklist",
     "core",
+    "whatsappbot",
 ]
 
 MIDDLEWARE = [
