@@ -1,8 +1,11 @@
-from rest_framework import serializers
+from typing import Dict
 from django.contrib.auth import password_validation, authenticate
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.exceptions import InvalidToken
 from .models import User
 from bot.utils import validate_incoming_data
-from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def get_tokens_for_user(user):
@@ -72,3 +75,15 @@ class UserLoginSerializer(serializers.ModelSerializer):
             "email": {"required": False},
             "password": {"write_only": True, "required": False},
         }
+
+
+class CookieTokenRefreshSerializer(TokenRefreshSerializer):
+    refresh = None
+
+    def validate(self, data):
+        data["refresh"] = self.context.get("request").COOKIES.get("refresh_token")
+
+        if data["refresh"]:
+            return super().validate(data)
+
+        return InvalidToken({"error": "No valid token found in cookie"})
