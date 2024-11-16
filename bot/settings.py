@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -26,8 +27,10 @@ SECRET_KEY = "django-insecure-=fk@anydo@ajy*8*u!xc$1e)n=xypao3b+es22z&$%3o^bdoc8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Application definition
 
@@ -132,7 +135,10 @@ AUTH_USER_MODEL = "core.User"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
 }
 
 SIMPLE_JWT = {
@@ -140,4 +146,13 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=10),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
+}
+
+CONFIG_FILE = os.path.join(BASE_DIR, "config.yaml")
+API_KEY = "AIzaSyBIi5-B03yNolwRaQeWzy4n-XFpSUdzJBo"
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
 }
