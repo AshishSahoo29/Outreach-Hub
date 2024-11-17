@@ -167,3 +167,4 @@ cython_debug/
 media/kb/**
 !media/kb
 !media
+*.txt
