@@ -8,14 +8,34 @@ from twilio.twiml.messaging_response import MessagingResponse
 from .query import Gen
 from .models import CampaignKnowledge
 from .serializer import CampaignKnowledgeSerializer
+from .task import process_campign_user_request
 
 
 class ClientReplyView(APIView):
 
     def post(self, request):
-        client_message = request.data.get("Body")
-        response = MessagingResponse()
-        response.message("Thank you for contacting via whatsapp!")
+        print("\n", request.data)
+        message_type = request.data.get("MessageType", [])
+        if "text" in message_type:
+            response = MessagingResponse()
+            client_message = request.data.get("Body")
+            client_number = request.data.get("From")
+            print("CLIENT MESSAGE", client_message)
+            cache_response = cache.get(client_message)
+            if cache_response:
+                response.message(cache_response)
+                return HttpResponse(
+                    str(response),
+                    content_type="application/xml",
+                    status=status.HTTP_200_OK,
+                )
+
+            process_campign_user_request.delay(client_message, client_number)
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        error_message = "Sorry, I can only process text messages at the moment."
+        print(f"Unsupported message type: {message_type}")
+        response.message(error_message)
+
         return HttpResponse(
             str(response), content_type="application/xml", status=status.HTTP_200_OK
         )
@@ -36,7 +56,6 @@ class BotResponseView(APIView):
         response = "This context is out of bound."
         if query is not None:
             app = Gen()
-            app.input_knowledge()
             response = app.query(query)
             cache.set(query, response, timeout=300)
 
